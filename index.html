@@ -59,6 +59,37 @@
             font-size: 18px;
             color: orange;
         }
+
+        /* Styling for the disclaimer */
+        #disclaimer {
+            background-color: #333;
+            color: white;
+            padding: 20px;
+            margin-top: 40px;
+            border-top: 2px solid orange;
+            display: none;
+        }
+
+        #disclaimer p {
+            line-height: 1.6;
+        }
+
+        #disclaimer .important {
+            font-weight: bold;
+            color: #FF0000;
+        }
+
+        #toggleDisclaimer {
+            display: block;
+            width: 200px;
+            margin: 20px auto;
+            padding: 10px;
+            background-color: orange;
+            color: white;
+            text-align: center;
+            font-weight: bold;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -66,44 +97,61 @@
     <div id="loading">Loading...</div>
     <div id="file-list" style="display: none;"></div>
 
+    <!-- Disclaimer Section -->
+    <div id="disclaimer">
+        <p><span class="important">@noahliNotFound will not be held responsible for any issues or damages arising from the download or use of the files provided on this website.</span></p>
+    </div>
+
+    <!-- Toggle Button for Disclaimer -->
+    <div id="toggleDisclaimer">Read Disclaimer</div>
+
     <script>
-    const repoOwner = 'Noah-Li2012';
-    const repoName = 'mystuffs';
-    const folderPath = 'pgms';
+        const repoOwner = 'Noah-Li2012';
+        const repoName = 'mystuffs';
+        const folderPath = 'pgms';
 
-    const loadingDiv = document.getElementById('loading');
-    const fileListDiv = document.getElementById('file-list');
-    const titleElement = document.querySelector('h1');
+        const loadingDiv = document.getElementById('loading');
+        const fileListDiv = document.getElementById('file-list');
+        const titleElement = document.querySelector('h1');
+        const disclaimerDiv = document.getElementById('disclaimer');
+        const toggleDisclaimerButton = document.getElementById('toggleDisclaimer');
 
-    fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents/${folderPath}`)
-        .then(response => response.json())
-        .then(data => {
-            loadingDiv.style.display = 'none';
-            fileListDiv.style.display = 'flex';
+        fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents/${folderPath}`)
+            .then(response => response.json())
+            .then(data => {
+                loadingDiv.style.display = 'none';
+                fileListDiv.style.display = 'flex';
 
-            const fileCount = data.filter(file => file.type === 'file').length;
-            titleElement.textContent = `Download my stuffs for free~ [${fileCount} File(s)]`;
+                const fileCount = data.filter(file => file.type === 'file').length;
+                titleElement.textContent = `Download my stuffs for free~ [${fileCount} File(s)]`;
 
-            data.forEach((file) => {
-                if (file.type === 'file') {
-                    let downloadUrl = file.download_url;
-                    if (file.name.endsWith('.txt') || file.name.endsWith('.md') || file.name.endsWith('.html')) {
-                        downloadUrl = `https://raw.githubusercontent.com/${repoOwner}/${repoName}/main/${folderPath}/${file.name}`;
+                data.forEach((file) => {
+                    if (file.type === 'file') {
+                        let downloadUrl = file.download_url;
+                        if (file.name.endsWith('.txt') || file.name.endsWith('.md') || file.name.endsWith('.html')) {
+                            downloadUrl = `https://raw.githubusercontent.com/${repoOwner}/${repoName}/main/${folderPath}/${file.name}`;
+                        }
+
+                        const fileElement = document.createElement('div');
+                        fileElement.classList.add('file-item');
+                        fileElement.innerHTML = `
+                            <p>${file.name.replace(/^\d+\s*/, '')} <a href="${downloadUrl}" download="${file.name}">Download</a></p>
+                        `;
+                        fileListDiv.appendChild(fileElement);
                     }
-
-                    const fileElement = document.createElement('div');
-                    fileElement.classList.add('file-item');
-                    fileElement.innerHTML = `
-                        <p>${file.name.replace(/^\d+\s*/, '')} <a href="${downloadUrl}" download="${file.name}">Download</a></p>
-                    `;
-                    fileListDiv.appendChild(fileElement);
-                }
+                });
+            })
+            .catch(error => {
+                loadingDiv.textContent = 'Error loading files.';
+                console.error('Error fetching file list:', error);
             });
-        })
-        .catch(error => {
-            loadingDiv.textContent = 'Error loading files.';
-            console.error('Error fetching file list:', error);
+
+        // Toggle disclaimer visibility
+        toggleDisclaimerButton.addEventListener('click', () => {
+            const isVisible = disclaimerDiv.style.display === 'block';
+            disclaimerDiv.style.display = isVisible ? 'none' : 'block';
+            toggleDisclaimerButton.textContent = isVisible ? 'Read Disclaimer' : 'Hide Disclaimer';
         });
-</script>
+    </script>
 </body>
 </html>
