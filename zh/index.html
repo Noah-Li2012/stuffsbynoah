@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>我的资源</title>
+    <style>
+        body {
+            background-color: #1a1a1a;
+            color: white;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            text-align: center;
+            padding: 20px;
+            border-bottom: 2px solid orange;
+        }
+
+        #file-list {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .file-item {
+            background-color: #333;
+            border: 2px solid orange;
+            margin: 10px 0;
+            padding: 10px;
+            width: 80%;
+            max-width: 400px;
+            text-align: center;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            transition: transform 0.3s;
+        }
+
+        .file-item:hover {
+            transform: scale(1.05);
+        }
+
+        a {
+            color: orange;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        #loading {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 18px;
+            color: orange;
+        }
+
+        /* 免责声明样式 */
+        #disclaimer {
+            background-color: #333;
+            color: white;
+            padding: 20px;
+            margin-top: 40px;
+            border-top: 2px solid orange;
+            display: none;
+        }
+
+        #disclaimer p {
+            line-height: 1.6;
+        }
+
+        #disclaimer .important {
+            font-weight: bold;
+            color: #FF0000;
+        }
+
+        #toggleDisclaimer {
+            display: block;
+            width: 200px;
+            margin: 20px auto;
+            padding: 10px;
+            background-color: orange;
+            color: white;
+            text-align: center;
+            font-weight: bold;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>免费下载我的资源~</h1>
+    <div id="loading">加载中...</div>
+    <div id="file-list" style="display: none;"></div>
+
+    <!-- 免责声明部分 -->
+    <div id="disclaimer">
+        <p><span class="important">@noahliNotFound 对因下载或使用本网站提供的文件而产生的任何问题或损害概不负责。</span></p>
+        <p><span class="important">比如某些文本文件可能会导致你的电脑崩溃（例如 “from 1 plus to 100000.txt”）。同时欢迎订阅 @noahliNotFound 的 YouTube 频道。</span></p>
+    </div>
+
+    <!-- 免责声明切换按钮 -->
+    <div id="toggleDisclaimer">查看免责声明</div>
+
+    <script>
+        const repoOwner = 'Noah-Li2012';
+        const repoName = 'mystuffs';
+        const folderPath = 'pgms';
+
+        const loadingDiv = document.getElementById('loading');
+        const fileListDiv = document.getElementById('file-list');
+        const titleElement = document.querySelector('h1');
+        const disclaimerDiv = document.getElementById('disclaimer');
+        const toggleDisclaimerButton = document.getElementById('toggleDisclaimer');
+
+        fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents/${folderPath}`)
+            .then(response => response.json())
+            .then(data => {
+                loadingDiv.style.display = 'none';
+                fileListDiv.style.display = 'flex';
+
+                const fileCount = data.filter(file => file.type === 'file').length;
+                titleElement.textContent = `免费下载我的资源~ [${fileCount} 个文件]`;
+
+                data.forEach((file) => {
+                    if (file.type === 'file') {
+                        let downloadUrl = file.download_url;
+                        if (file.name.endsWith('.txt') || file.name.endsWith('.md') || file.name.endsWith('.html')) {
+                            downloadUrl = `https://raw.githubusercontent.com/${repoOwner}/${repoName}/main/${folderPath}/${file.name}`;
+                        }
+
+                        const fileElement = document.createElement('div');
+                        fileElement.classList.add('file-item');
+                        fileElement.innerHTML = `
+                            <p>${file.name.replace(/^\d+\s*/, '')} <a href="${downloadUrl}" download="${file.name}">下载</a></p>
+                        `;
+                        fileListDiv.appendChild(fileElement);
+                    }
+                });
+            })
+            .catch(error => {
+                loadingDiv.textContent = '加载文件时出错。';
+                console.error('获取文件列表出错:', error);
+            });
+
+        // 切换免责声明显示隐藏
+        toggleDisclaimerButton.addEventListener('click', () => {
+            const isVisible = disclaimerDiv.style.display === 'block';
+            disclaimerDiv.style.display = isVisible ? 'none' : 'block';
+            toggleDisclaimerButton.textContent = isVisible ? '查看免责声明' : '隐藏免责声明';
+        });
+    </script>
+</body>
+</html>
